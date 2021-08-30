@@ -1,0 +1,58 @@
+﻿@page "/"
+@inject IGuestData _guestData
+
+@if (_guestList != null)
+{
+    @foreach (var item in _guestList)
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <h2>@item.Id @item.FirstName @item.LastName</h2>
+            </div>
+            
+            <div class="col-md-6">
+                <button class="btn btn-primary" @onclick="()=>AddGuest(item)">Add Guest</button>
+                <button class="btn btn-dark" @onclick="()=>UpdateGuest(item)">Update Guest</button>
+                <button class="btn btn-danger" @onclick="() => DeleteGuest(item)">Remove Guest</button>
+            </div>
+        </div>
+    }
+}
+
+@code
+{
+    private List<GuestModel> _guestList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _guestList = await _guestData.GetGuests();
+    }
+
+    private async Task AddGuest(GuestModel guest)
+    {
+        await _guestData.CreateGuest(new GuestModel
+        {
+            Id = _guestList.Count + 1,
+            FirstName = guest.FirstName,
+            LastName = guest.LastName
+        });
+
+        _guestList = await _guestData.GetGuests();
+    }
+
+    private async Task UpdateGuest(GuestModel guest)
+    {
+        guest.LastName = "Jones";
+        await _guestData.UpdateGuest(guest.Id, guest);
+
+        _guestList = await _guestData.GetGuests();
+    }
+
+    private async Task DeleteGuest(GuestModel guest)
+    {
+        await _guestData.DeleteGuest(guest.Id);
+
+        _guestList = await _guestData.GetGuests();
+    }
+
+}
